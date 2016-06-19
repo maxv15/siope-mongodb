@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # "Python Script that downloads data from Siope.it and populates siope db in MongoDB"
-import datetime
 
 __author__ = "Massimiliano Scotti"
 __license__ = "MIT License"
@@ -9,6 +8,7 @@ __license__ = "MIT License"
 import pymongo
 import csv
 import sys
+import datetime
 import multiprocessing as mp
 import glob
 import os
@@ -42,6 +42,10 @@ except ImportError:
 
 # This is a global variable that defines socket where mongod process is waiting for new connections
 socket = None
+
+
+def get_connection():
+	return pymongo.MongoClient(socket).siope
 
 
 def retrieve_data():
@@ -101,8 +105,7 @@ def uscite_aggregation():
 def csv_enti(path):
     print('CREATING csv_enti')
 
-    connection = pymongo.MongoClient(socket)
-    db = connection.siope
+    db = get_connection()
 
     db.csv_enti.drop()
     bulk = db.csv_enti.initialize_unordered_bulk_op()
@@ -121,8 +124,7 @@ def csv_enti(path):
 def csv_comparti(path):
     print('CREATING csv_comparti')
 
-    connection = pymongo.MongoClient(socket)
-    db = connection.siope
+    db = get_connection()
 
     db.csv_comparti.drop()
     bulk = db.csv_comparti.initialize_unordered_bulk_op()
@@ -139,8 +141,7 @@ def csv_comparti(path):
 def csv_sottocomparti(path):
     print('CREATING csv_sottocomparti')
 
-    connection = pymongo.MongoClient(socket)
-    db = connection.siope
+    db = get_connection()
 
     db.csv_sottocomparti.drop()
     bulk = db.csv_sottocomparti.initialize_unordered_bulk_op()
@@ -157,8 +158,7 @@ def csv_sottocomparti(path):
 def csv_comuni(path):
     print('CREATING csv_comuni')
 
-    connection = pymongo.MongoClient(socket)
-    db = connection.siope
+    db = get_connection()
     db.csv_comuni.drop()
     bulk = db.csv_comuni.initialize_unordered_bulk_op()
 
@@ -174,8 +174,7 @@ def csv_comuni(path):
 def csv_regprov(path):
     print('CREATING csv_regprov')
 
-    connection = pymongo.MongoClient(socket)
-    db = connection.siope
+    db = get_connection()
     db.csv_regprov.drop()
     bulk = db.csv_regprov.initialize_unordered_bulk_op()
 
@@ -192,8 +191,7 @@ def csv_regprov(path):
 def csv_codgest_entrate(path):
     print('CREATING csv_codgest_entrate')
 
-    connection = pymongo.MongoClient(socket)
-    db = connection.siope
+    db = get_connection()
     db.csv_codgest_entrate.drop()
     bulk = db.csv_codgest_entrate.initialize_unordered_bulk_op()
 
@@ -210,8 +208,7 @@ def csv_codgest_entrate(path):
 def csv_codgest_uscite(path):
     print('CREATING csv_codgest_uscite')
 
-    connection = pymongo.MongoClient(socket)
-    db = connection.siope
+    db = get_connection()
 
     db.csv_codgest_uscite.drop()
     bulk = db.csv_codgest_uscite.initialize_unordered_bulk_op()
@@ -229,8 +226,7 @@ def csv_codgest_uscite(path):
 def csv_entrate(path):
     print('CREATING csv_entrate')
 
-    connection = pymongo.MongoClient(socket)
-    db = connection.siope
+    db = get_connection()
 
     db.csv_entrate.drop()
     bulk = db.csv_entrate.initialize_unordered_bulk_op()
@@ -256,8 +252,7 @@ def csv_entrate(path):
 def csv_uscite(path):
     print('CREATING csv_uscite')
 
-    connection = pymongo.MongoClient(socket)
-    db = connection.siope
+    db = get_connection()
     db.csv_uscite.drop()
     bulk = db.csv_uscite.initialize_unordered_bulk_op()
 
@@ -310,9 +305,9 @@ def table_to_collection(download=True):
     # Invert the comments of the following lines to populate your database with all the years
     # ---------------------------------------------------------------------------------------
     # p8 = mp.Process(target=csv_entrate,args=(glob.glob('ENTRATE.csv')[0],))
-    p8 = mp.Process(target=csv_entrate, args=(glob.glob('ENTRATE_2015*.csv')[0],))
+    p8 = mp.Process(target=csv_entrate, args=(glob.glob('ENTRATE_2016*.csv')[0],))
     # p9 = mp.Process(target=csv_uscite,args=(glob.glob('USCITE.csv')[0],))
-    p9 = mp.Process(target=csv_uscite, args=(glob.glob('USCITE_2015*.csv')[0],))
+    p9 = mp.Process(target=csv_uscite, args=(glob.glob('USCITE_2016*.csv')[0],))
 
     p1.start()
     p2.start()
@@ -336,8 +331,7 @@ def table_to_collection(download=True):
 
 def build_collection_mdb():
     print('*** CREATING MDB COLLECTIONS *** [Step 2/3]')
-    connection = pymongo.MongoClient(socket)
-    db = connection.siope
+    db = get_connection()
 
     db.csv_sottocomparti.create_index([('SOTTOCOMPARTO', pymongo.ASCENDING)])
     db.csv_comparti.create_index([('COD_COMPARTO', pymongo.ASCENDING)])
@@ -432,8 +426,7 @@ def build_collection_mdb():
 def creating_entrate_mdb():
     print('CREATING mdb_entrate')
 
-    connection = pymongo.MongoClient(socket)
-    db = connection.siope
+    db = get_connection()
 
     db.mdb_entrate.create_index([('COD_ENTE', pymongo.ASCENDING), ('ANNO', pymongo.ASCENDING),
                                  ('PERIODO', pymongo.ASCENDING), ('COD_GEST', pymongo.ASCENDING)])
@@ -456,8 +449,7 @@ def creating_entrate_mdb():
 
 
 def creating_entrate_mdb_helper(skip, limit):
-    connection = pymongo.MongoClient(socket)
-    db = connection.siope
+    db = get_connection()
     if limit is not None:
         cursor = db.csv_entrate.find().limit(limit)
     else:
@@ -508,8 +500,7 @@ def creating_entrate_mdb_helper(skip, limit):
 def creating_uscite_mdb():
     print('CREATING mdb_uscite')
 
-    connection = pymongo.MongoClient(socket)
-    db = connection.siope
+    db = get_connection()
 
     db.mdb_uscite.create_index([('COD_ENTE', pymongo.ASCENDING), ('ANNO', pymongo.ASCENDING),
                                 ('PERIODO', pymongo.ASCENDING), ('COD_GEST', pymongo.ASCENDING)])
@@ -532,8 +523,7 @@ def creating_uscite_mdb():
 
 
 def creating_uscite_mdb_helper(skip, limit):
-    connection = pymongo.MongoClient(socket)
-    db = connection.siope
+    db = get_connection()
     if limit is not None:
         cursor = db.csv_uscite.find().limit(limit)
     else:
@@ -595,8 +585,7 @@ def build_timeseries():
 def entrate_ts():
     print('CREATING mdb_entrate_mensili')
 
-    connection = pymongo.MongoClient(socket)
-    db = connection.siope
+    db = get_connection()
 
     mdb_entrate = db.mdb_entrate.find()
     db.mdb_entrate_mensili.drop()
@@ -628,8 +617,7 @@ def entrate_ts():
 def uscite_ts():
     print('CREATING mdb_uscite_mensili')
 
-    connection = pymongo.MongoClient(socket)
-    db = connection.siope
+    db = get_connection()
 
     mdb_uscite = db.mdb_uscite.find()
     db.mdb_uscite_mensili.drop()
