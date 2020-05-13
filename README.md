@@ -20,9 +20,9 @@ You can run this script every Friday to update data.
 
 NB: 3.1 and 3.3 drop collections and recreate them. 3.2 is an incremental update.
   
-##Instructions
+## Instructions
 
-###Script use
+### Script use
 
     usage: main.py [-h] [--download=True] [--download=False] [--host HOST]
                [--port PORT]
@@ -41,7 +41,7 @@ NB: 3.1 and 3.3 drop collections and recreate them. 3.2 is an incremental update
 The script may take several minutes.
 ** You can use pypy to speed up the process! ** (~50% faster)
 
-###Queries
+### Queries
 
 *queries.js* contains some sample queries. To use this:
 
@@ -98,7 +98,7 @@ or
 
 ...or whatever you want to do. 
 
-###Indexes
+### Indexes
 You can use *ensureIndexes.js* file to ensure new indexes on collections.
 Open and modify it as you want.
 
@@ -119,7 +119,7 @@ Test cases:
 - Python 2 (Mac OS X, Ubuntu)
 - Python 3 (Mac OS X, Ubuntu, Windows 10)
 
-##License
+## License
 
 	The MIT License (MIT)
 	
